@@ -39,21 +39,21 @@ def hr_5_3_0(inputs):
         2,
         strides=2,
         padding='same',
-        name='Final_conv'
+        name='Down_sample_0'
     )(x[0])
     x = layers.Conv2D(
         8,
         2,
         strides=2,
         padding='same',
-        name='Final_conv'
+        name='Down_sample_1'
     )(x)
     x = layers.Conv2D(
         8,
         2,
         strides=2,
         padding='same',
-        name='Final_conv'
+        name='Down_sample_2'
     )(x)
     x = layers.Flatten()(x)
     outputs = layers.Activation('linear', dtype='float32')(x)

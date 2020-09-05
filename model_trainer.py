@@ -8,6 +8,7 @@ import albumentations as A
 import random
 from skimage import transform, util
 import cv2
+import numpy as np
 
 
 class BoxModel(keras.Model):
@@ -222,17 +223,18 @@ def get_model(model_f):
     return test_model
 
 def run_training(
-        model_f, 
+        encoder_f,
+        box_f, 
         lr_f, 
         name, 
         epochs, 
         batch_size, 
-        X_train, 
-        Y_train, 
-        val_data,
+        steps_per_epoch,
+        img,
+        data,
+        img_size, 
         mixed_float = True,
         notebook = True,
-        augment = True,
     ):
     """
     val_data : (X_val, Y_val) tuple
@@ -243,14 +245,18 @@ def run_training(
     
     st = time.time()
 
-    inputs = keras.Input((200,200,3))
-    mymodel = AdiposeModel(inputs, model_f)
-    loss = keras.losses.BinaryCrossentropy(from_logits=True)
+    inputs = {
+        'image' : keras.Input((800,600,3)),
+        'pos' : keras.Input((2))
+    }
+    mymodel = BoxModel(inputs, model_f, box_f)
+    mymodel.summary()
+    loss = keras.losses.MeanSquaredError()
     mymodel.compile(
         optimizer='adam',
         loss=loss,
         metrics=[
-            keras.metrics.BinaryAccuracy(threshold=0.1),
+            'mse',
         ]
     )
 
@@ -276,38 +282,38 @@ def run_training(
     else:
         tqdm_callback = TqdmCallback()
 
-    if augment:
-        train_ds = create_train_dataset(X_train, Y_train, batch_size)
-        mymodel.fit(
-            x=train_ds,
-            epochs=epochs,
-            steps_per_epoch=X_train.shape[0]//batch_size,
-            callbacks=[
-                tensorboard_callback,
-                lr_callback,
-                save_callback,
-                tqdm_callback,
-            ],
-            verbose=0,
-            validation_data=val_data,
-        )
+    # if augment:
+    train_ds = create_train_dataset(img, data, img_size, batch_size)
+    mymodel.fit(
+        x=train_ds,
+        epochs=epochs,
+        steps_per_epoch=steps_per_epoch,
+        callbacks=[
+            tensorboard_callback,
+            lr_callback,
+            save_callback,
+            tqdm_callback,
+        ],
+        verbose=0,
+        # validation_data=val_data,
+    )
 
 
-    else:
-        mymodel.fit(
-            x=X_train,
-            y=Y_train,
-            epochs=epochs,
-            batch_size=batch_size,
-            callbacks=[
-                tensorboard_callback,
-                lr_callback,
-                save_callback,
-                tqdm_callback,
-            ],
-            verbose=0,
-            validation_data=val_data
-        )
+    # else:
+    #     mymodel.fit(
+    #         x=X_train,
+    #         y=Y_train,
+    #         epochs=epochs,
+    #         batch_size=batch_size,
+    #         callbacks=[
+    #             tensorboard_callback,
+    #             lr_callback,
+    #             save_callback,
+    #             tqdm_callback,
+    #         ],
+    #         verbose=0,
+    #         validation_data=val_data
+    #     )
 
     print('Took {} seconds'.format(time.time()-st))
 

@@ -1,0 +1,4 @@
+jupyter
+#tensorflow
+traitlets==4.3.3
+albumentations

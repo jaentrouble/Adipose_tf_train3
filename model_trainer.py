@@ -140,7 +140,10 @@ class AugGenerator():
         t_img = np.array(transformed['image'],np.uint8)
         t_pos = np.array(transformed['keypoints'][0], np.int32)
         t_box = np.array(transformed['bboxes'][0], np.int32)
-        X = (t_img, t_pos)
+        X = {
+            'image' : t_img,
+            'pos' : t_pos
+        }
         Y = t_box
         return X, Y
 
@@ -149,12 +152,18 @@ def create_train_dataset(img, data, img_size, batch_size):
     autotune = tf.data.experimental.AUTOTUNE
     dataset = tf.data.Dataset.from_generator(
         AugGenerator(img, data, img_size),
-        ((tf.uint8, tf.int32), tf.int32),
+        output_types=(
+            {
+                'image' : tf.uint8,
+                'pos' : tf.int32,
+            },
+            tf.int32,
+        ),
         output_shapes=(
-            (
-                tf.TensorShape([img_size[0],img_size[1],3]),
-                tf.TensorShape([2])
-            ),
+            {
+                'image' : tf.TensorShape([img_size[0],img_size[1],3]),
+                'pos' : tf.TensorShape([2])
+            },
             tf.TensorShape([4])
         )
     )
@@ -327,7 +336,7 @@ if __name__ == '__main__':
         img = img[0]
         pos = pos[0]
         xmin,ymin,xmax,ymax = s[1][0]
-        rr, cc = draw.disk((pos[1],pos[0]),5)
+        rr, cc = draw.disk((pos[1],pos[0]),5, shape=img.shape[:2])
         img[rr,cc] = [0,255,0]
         rr, cc = draw.rectangle_perimeter((ymin,xmin),(ymax,xmax))
         img[rr,cc] = [255,0,0]

@@ -246,7 +246,7 @@ def run_training(
     st = time.time()
 
     inputs = {
-        'image' : keras.Input((800,600,3)),
+        'image' : keras.Input((img_size[0],img_size[1],3)),
         'pos' : keras.Input((2))
     }
     mymodel = BoxModel(inputs, encoder_f, box_f)

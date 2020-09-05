@@ -249,7 +249,7 @@ def run_training(
         'image' : keras.Input((800,600,3)),
         'pos' : keras.Input((2))
     }
-    mymodel = BoxModel(inputs, model_f, box_f)
+    mymodel = BoxModel(inputs, encoder_f, box_f)
     mymodel.summary()
     loss = keras.losses.MeanSquaredError()
     mymodel.compile(

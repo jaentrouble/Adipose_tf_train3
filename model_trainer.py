@@ -29,24 +29,40 @@ class BoxModel(keras.Model):
     box
         [xmin, ymin, xmax, ymax]
     """
-    def __init__(self, inputs, encoder_function):
+    def __init__(self, inputs, encoder_function, box_function):
         """
         arguments
         ---------
-        inputs : keras.Input
-        model_function 
-            function that takes keras.Input and returns output tensor
+        inputs : dictionary of keras.Input
+            keys:
+                'image' : image input
+                'pos' : mouse position input
+
+        encoder_function : function 
+            Function that uses keras functional API to make a encoder model
+            Takes the image input and outputs encoded tensor of the image
+        
+        box_function : function
+            Function that uses keras functional API to make a box model
+            Takes the encoded image tensor and 'pos' as inputs.
+            Outputs a tensor of [xmin, ymin, xmax, ymax]
         """
         super().__init__()
-        outputs = model_function(inputs)
-        self.model = keras.Model(inputs=inputs, outputs=outputs)
-        self.logits.summary()
+        image_input = inputs['image']
+        pos_input = inputs['pos']
+
+        image_output = encoder_function(image_input)
+        self.encoder_model = keras.Model(inputs=image_input, 
+                                         outputs=image_output)
+        
+        encoded_input = keras.Input(image_output.shape[1:])
+        box_output = box_function(encoded_input, pos_input)
+        self.box_model = keras.Model(inputs=[encoded_input, pos_input],
+                                     outputs=box_output)
         
     def call(self, inputs, training=None):
-        casted = tf.cast(inputs, tf.float32) / 255.0
-        if training:
-            return self.logits(inputs, training=training)
-        return tf.math.sigmoid(self.logits(inputs, training=training))
+        encoded = self.encoder_model(inputs['image'], training=training)
+        return self.box_model([encoded, inputs['pos']], training=training)
 
 class AugGenerator():
     """An iterable generator that makes data

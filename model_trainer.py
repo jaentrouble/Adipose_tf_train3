@@ -332,9 +332,8 @@ if __name__ == '__main__':
     fig = plt.figure()
     for i, s in enumerate(sample):
         ax = fig.add_subplot(5,1,i+1)
-        img, pos = s[0]
-        img = img[0]
-        pos = pos[0]
+        img = s[0]['image'][0]
+        pos = s[0]['pos'][0]
         xmin,ymin,xmax,ymax = s[1][0]
         rr, cc = draw.disk((pos[1],pos[0]),5, shape=img.shape[:2])
         img[rr,cc] = [0,255,0]

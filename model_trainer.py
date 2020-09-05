@@ -250,7 +250,6 @@ def run_training(
         'pos' : keras.Input((2))
     }
     mymodel = BoxModel(inputs, encoder_f, box_f)
-    mymodel.summary()
     loss = keras.losses.MeanSquaredError()
     mymodel.compile(
         optimizer='adam',

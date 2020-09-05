@@ -4,6 +4,7 @@ import encoder_models
 import box_models
 import model_lr
 import tensorflow as tf
+import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-em','--encodermodel', dest='emodel')

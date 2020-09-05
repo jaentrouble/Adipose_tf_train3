@@ -10,26 +10,36 @@ from skimage import transform, util
 import cv2
 
 
-class AdiposeModel(keras.Model):
-    def __init__(self, inputs, model_function):
-        """
-        Because of numerical stability, softmax layer should be
-        taken out, and use it only when not training.
+class BoxModel(keras.Model):
+    """A model that gets image and mouse pos as inputs and returns a box
 
+    For speed, the encoding part should be saved seperately.
+    Therefore, the output tensor's shape should match the input shape
+    of the box-detecting model.
+
+    inputs
+    ------
+    image
+        image of the cells
+    pos
+        mouse position
+
+    output
+    ------
+    box
+        [xmin, ymin, xmax, ymax]
+    """
+    def __init__(self, inputs, encoder_function):
+        """
         arguments
         ---------
         inputs : keras.Input
         model_function 
-            function that takes keras.Input and returns
-
-        output
-        ------
-            output : Tensor
-                tensor of logits
+            function that takes keras.Input and returns output tensor
         """
         super().__init__()
         outputs = model_function(inputs)
-        self.logits = keras.Model(inputs=inputs, outputs=outputs)
+        self.model = keras.Model(inputs=inputs, outputs=outputs)
         self.logits.summary()
         
     def call(self, inputs, training=None):
@@ -47,6 +57,9 @@ class AugGenerator():
 
           Image input is expected to be the shape of (height, width),
           i.e. the transformation to match two is handled in here automatically
+
+    NOTE: THE OUTPUT IMAGE WILL BE (WIDTH, HEIGHT)
+          It is because pygame has shape (width, height)
 
     return
     ------
@@ -70,7 +83,8 @@ class AugGenerator():
                         IMPORTANT : (WIDTH, HEIGHT)
         img_size : tuple
             Desired output image size
-            IMPORTANT : (HEIGHT, WIDTH)
+            The axes will be swapped to match pygame.
+            IMPORTANT : (WIDTH, HEIGHT)
         """
         self.img = img
         self.data = data
@@ -85,12 +99,11 @@ class AugGenerator():
             ], p=0.8),
             A.VerticalFlip(p=0.5),
             A.RandomRotate90(p=1),
-            A.Resize(img_size[0], img_size[1]),
+            A.Resize(img_size[1], img_size[0]),
         ],
         bbox_params=A.BboxParams(format='pascal_voc', label_fields=['bbox_classes']),
         keypoint_params=A.KeypointParams(format='xy'),
         )
-        self.resize = A.Resize(img_size[0], img_size[1])
 
     def __iter__(self):
         return self
@@ -137,7 +150,7 @@ class AugGenerator():
             bbox_classes=['cell'],
             keypoints=[cropped_pos],
         )
-        t_img = np.array(transformed['image'],np.uint8)
+        t_img = np.array(transformed['image'],np.uint8).swapaxes(0,1)
         t_pos = np.array(transformed['keypoints'][0], np.int32)
         t_box = np.array(transformed['bboxes'][0], np.int32)
         X = {
@@ -327,12 +340,12 @@ if __name__ == '__main__':
     # gen = AugGenerator(img, data, (400,400))
     # s = next(gen)
 
-    ds = create_train_dataset(img, data, (300,400), 1)
+    ds = create_train_dataset(img, data, (400,300), 1)
     sample = ds.take(5).as_numpy_iterator()
     fig = plt.figure()
     for i, s in enumerate(sample):
         ax = fig.add_subplot(5,1,i+1)
-        img = s[0]['image'][0]
+        img = s[0]['image'][0].swapaxes(0,1)
         pos = s[0]['pos'][0]
         xmin,ymin,xmax,ymax = s[1][0]
         rr, cc = draw.disk((pos[1],pos[0]),5, shape=img.shape[:2])

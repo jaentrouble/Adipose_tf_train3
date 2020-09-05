@@ -250,12 +250,13 @@ def run_training(
         'pos' : keras.Input((2))
     }
     mymodel = BoxModel(inputs, encoder_f, box_f)
-    loss = keras.losses.MeanSquaredError()
+    loss = keras.losses.MeanSquaredLogarithmicError()
     mymodel.compile(
         optimizer='adam',
         loss=loss,
         metrics=[
             'mse',
+            'msle',
         ]
     )
 

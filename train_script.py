@@ -1,12 +1,13 @@
 import numpy as np
 from model_trainer import run_training
-import adipose_models
+import encoder_models
+import box_models
 import model_lr
-import argparse
 import tensorflow as tf
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-m','--model', dest='model')
+parser.add_argument('-em','--encodermodel', dest='emodel')
+parser.add_argument('-bm','--boxmodel', dest='bmodel')
 parser.add_argument('-lr', dest='lr')
 parser.add_argument('-n','--name', dest='name')
 parser.add_argument('-e','--epochs', dest='epochs')
@@ -25,37 +26,46 @@ if args.mem_growth:
         except RuntimeError as e:
             print(e)
 
-with np.load('cell_mask_data.npz') as data:
-    X = data['img']
-    Y = data['mask']
+import imageio as io
+import json
 
-print('X shape:',X.shape)
-print('Y shape:',Y.shape)
+img_names = os.listdir('data/done')
+img = []
+img_name_dict = {}
+for idx, name in enumerate(img_names):
+    img.append(io.imread('data/done/'+name))
+    img_name_dict[name] = idx
 
-X_train = X[:1200]
-Y_train = Y[:1200]
-X_val = X[1200:1350]
-Y_val = Y[1200:1350]
-X_test = X[1350:]
-Y_test = Y[1350:]
+json_names = os.listdir('data/save')
+data = []
+for name in json_names:
+    with open('data/save/'+name,'r') as j:
+        data.extend(json.load(j))
+for datum in data :
+    datum['image'] = img_name_dict[datum['image']]
 
-model_f = getattr(adipose_models, args.model)
+encoder_f = getattr(encoder_models, args.emodel)
+box_f = getattr(box_models, args.bmodel)
 lr_f = getattr(model_lr, args.lr)
 name = args.name
+batch_size = 10
+img_size = (400,320)
 epochs = int(args.epochs)
+steps_per_epoch = len(data)//batch_size
 mixed_float = args.mixed_float
 
-kwargs = {}
-kwargs['model_f'] = model_f
-kwargs['lr_f'] = lr_f
-kwargs['name'] = name
-kwargs['epochs'] = epochs
-kwargs['batch_size'] = 32
-kwargs['X_train'] = X_train
-kwargs['Y_train'] = Y_train
-kwargs['val_data'] = (X_val, Y_val)
-kwargs['mixed_float'] = mixed_float
-kwargs['notebook'] = False
-kwargs['augment'] = True
-
+kwargs = dict(
+    encoder_f = encoder_f,
+    box_f = box_f,
+    lr_f = lr_f,
+    name = name,
+    epochs = epochs,
+    steps_per_epoch=steps_per_epoch,
+    mixed_float=mixed_float,
+    batch_size=batch_size,
+    img=img,
+    data=data,
+    img_size=img_size,
+    notebook= False,
+)
 run_training(**kwargs)

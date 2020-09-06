@@ -81,8 +81,10 @@ class AugGenerator():
     return
     ------
     X : tuple of (img, pos), dtype= np.uint8, np.int32
-        img : np.array 
+        img : np.array
+            shape : (WIDTH, HEIGHT, 3)
         pos : tuple
+            (WIDTH, HEIGHT)
     Y : tuple of (xmin, ymin, xmax, ymax) dtype= np.int32
     """
     def __init__(self, img, data, img_size):
@@ -210,6 +212,33 @@ def create_train_dataset(img, data, img_size, batch_size):
     dataset = dataset.repeat()
 
     return dataset
+
+def create_val_data(img, data, img_size, batch_size):
+    """No modification to the image, including cropping and rotating
+    """
+    t_img = []
+    T = A.Resize(img_size[1],img_size[0])
+    for i in img:
+        resized = T(image=i)['image'].astype(np.uint8)
+        t_img.append(resized.swapaxes(0,1))
+    X = []
+    Y = []
+    for datum in data:
+        t_i = t_img[datum['image']].copy()
+        mask_idx = random.randrange(0,len(datum['mask'][0]))
+
+        i_size = np.array(datum['size'])
+        pos = np.array([datum['mask'][0][mask_idx], datum['mask'][1][mask_idx]])
+        t_pos = pos / i_size
+        t_boxmin = datum['box'][0] / i_size
+        t_boxmax = datum['box'][1] / i_size
+        t_box = np.append(t_boxmin, t_boxmax)
+        X.append({
+            'image' : t_i,
+            'pos' : t_pos.astype(np.float32)
+        })
+        Y.append(t_box.astype(np.float32))
+    return X, Y
 
 
 def get_model(encoder_f, box_f, img_size):

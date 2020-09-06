@@ -228,6 +228,7 @@ def create_val_data(img, data, img_size):
     Y = []
     for datum in data:
         t_i = t_img[datum['image']].copy()
+        t_i = t_i.swapaxes(0,1)
         mask_idx = random.randrange(0,len(datum['mask'][0]))
 
         i_size = np.array(datum['size'])

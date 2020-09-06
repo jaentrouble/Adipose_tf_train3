@@ -239,6 +239,9 @@ def create_val_data(img, data, img_size):
         X['image'].append(t_i)
         X['pos'].append(t_pos.astype(np.float32))
         Y.append(t_box.astype(np.float32))
+    X['image'] = np.array(X['image'])
+    X['pos'] = np.array(X['pos'])
+    Y = np.array(Y)
     return X, Y
 
 

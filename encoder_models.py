@@ -86,13 +86,11 @@ def hr_5_3_0_gap(inputs):
         blocks=[3,3,3,3],
         name='HR_4'
     )(x)
-    print(len(x))
     x_8_to_16 = clayers.BasicBlock(
         filters=16,
         stride=2,
         name='Downsample_0'
     )(x[0])
-    print(len(x))
     x_16 = layers.Add()([x_8_to_16, x[1]])
     x_16 = layers.BatchNormalization(momentum=clayers.BN_MOMENTUM)(x_16)
     x_16 = layers.ReLU()(x_16)
@@ -100,8 +98,7 @@ def hr_5_3_0_gap(inputs):
         filters=32,
         stride=2,
         name='Downsample_1'
-    )
-    print(len(x))
+    )(x_16)
     x_32 = layers.Add()([x_16_to_32, x[2]])
     x_32 = layers.BatchNormalization(momentum=clayers.BN_MOMENTUM)(x_32)
     x_32 = layers.ReLU()(x_32)
@@ -109,7 +106,7 @@ def hr_5_3_0_gap(inputs):
         filters=64,
         stride=2,
         name='Downsample_2'
-    )
+    )(x_32)
     x_64 = layers.Add()([x_32_to_64,x[3]])
     x_64 = layers.BatchNormalization(momentum=clayers.BN_MOMENTUM)(x_64)
     x_64 = layers.ReLU()(x_64)

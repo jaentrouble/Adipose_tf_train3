@@ -23,7 +23,9 @@ class BoxModel(keras.Model):
     image
         image of the cells
     pos
-        mouse position
+        mouse position 
+        NOTE: Takes the RAW pixel value. The model will normalize
+            itself.
 
     output
     ------

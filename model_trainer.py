@@ -383,7 +383,7 @@ if __name__ == '__main__':
 
     json_names = os.listdir('data/save')
     data = []
-    for name in json_names[:2]:
+    for name in json_names[2:]:
         with open('data/save/'+name,'r') as j:
             data.extend(json.load(j))
     for datum in data :

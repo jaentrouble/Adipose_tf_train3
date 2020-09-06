@@ -54,3 +54,12 @@ def dense_128_4(encode_input, pos_input):
 
     outputs = layers.Activation('linear',dtype='float32')(x)
     return outputs
+
+def dense_256_embed_128(encode_input, pos_input):
+    pos_embed = layers.Dense(128)(pos_input)
+
+    x = layers.Concatenate()([encode_input, pos_embed])
+    x = layers.Dense(256, activation='relu')(x)
+    x = layers.Dense(4)(x)
+    outputs = layers.Activation('linear', dtype='float32')(x)
+    return outputs

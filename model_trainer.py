@@ -10,6 +10,7 @@ from skimage import transform, util
 import cv2
 import numpy as np
 
+# TODO: Change 'pos' to be normalized BEFORE putting into the model.
 
 class BoxModel(keras.Model):
     """A model that gets image and mouse pos as inputs and returns a box
@@ -26,6 +27,9 @@ class BoxModel(keras.Model):
         mouse position 
         NOTE: Takes the RAW pixel value. The model will normalize
             itself.
+        NOTE: The pixel value is based on the size of image input.
+            If you changed the size of image to put into the model,
+            you have to also modify the pos to match.
 
     output
     ------

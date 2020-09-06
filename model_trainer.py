@@ -212,20 +212,20 @@ def create_train_dataset(img, data, img_size, batch_size):
     return dataset
 
 
-def get_model(model_f):
+def get_model(encoder_f, box_f, img_size):
     """
     To get model only and load weights.
     """
     # policy = mixed_precision.Policy('mixed_float16')
     # mixed_precision.set_policy(policy)
-    inputs = keras.Input((200,200,3))
-    test_model = AdiposeModel(inputs, model_f)
+    inputs = {
+        'image' : keras.Input((img_size[0],img_size[1],3)),
+        'pos' : keras.Input((2))
+    }
+    test_model = BoxModel(inputs, encoder_f, box_f)
     test_model.compile(
         optimizer='adam',
-        loss=keras.losses.BinaryCrossentropy(from_logits=True),
-        metrics=[
-            keras.metrics.BinaryAccuracy(threshold=0.1),
-        ]
+        loss=keras.losses.MeanSquaredError(),
     )
     return test_model
 

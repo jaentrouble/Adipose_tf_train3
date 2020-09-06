@@ -213,7 +213,7 @@ def create_train_dataset(img, data, img_size, batch_size):
 
     return dataset
 
-def create_val_data(img, data, img_size, batch_size):
+def create_val_data(img, data, img_size):
     """No modification to the image, including cropping and rotating
     """
     t_img = []

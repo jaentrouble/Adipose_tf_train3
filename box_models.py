@@ -35,9 +35,15 @@ def dense_128_4_normoutpos(encode_input, pos_input, image_size):
     # Normalize position for stability
     width = image_size[0]
     height = image_size[1]
-    ratio = tf.convert_to_tensor([1/width,1/height,1/width,1/height])
+    ratio = tf.convert_to_tensor([
+        1/width,
+        1/height,
+        1/width,
+        1/height,
+    ], dtype=tf.float32)
+    ratio = tf.reshape(ratio, [1,4])
     pos_input = layers.Multiply()([pos_input, ratio])
-    
+
     x = layers.Concatenate()([encode_input, pos_input])
     x = layers.Dense(128, activation='relu')(x)
     x = layers.Dense(4)(x)

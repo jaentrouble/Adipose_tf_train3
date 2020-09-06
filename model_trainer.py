@@ -263,7 +263,6 @@ def run_training(
         loss=loss,
         metrics=[
             'mse',
-            'msle',
         ]
     )
 

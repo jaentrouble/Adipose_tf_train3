@@ -231,8 +231,7 @@ def create_val_data(img, data, img_size):
         mask_idx = random.randrange(0,len(datum['mask'][0]))
 
         i_size = np.array(datum['size'])
-        pos = np.array([datum['mask'][0][mask_idx], datum['mask'][1][mask_idx]])
-        t_pos = pos / i_size
+        t_pos = np.array([datum['mask'][0][mask_idx], datum['mask'][1][mask_idx]])
         t_boxmin = datum['box'][0] / i_size
         t_boxmax = datum['box'][1] / i_size
         t_box = np.append(t_boxmin, t_boxmax)

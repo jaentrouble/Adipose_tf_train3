@@ -91,7 +91,7 @@ def hr_5_3_0_gap(inputs):
         stride=2,
         name='Downsample_0'
     )(x[0])
-    x_16 = tf.add(x_8_to_16, x[1])
+    x_16 = layers.Add()([x_8_to_16, x[1]])
     x_16 = layers.BatchNormalization(momentum=clayers.BN_MOMENTUM)(x_16)
     x_16 = layers.ReLU()(x_16)
     x_16_to_32 = clayers.BasicBlock(
@@ -99,7 +99,7 @@ def hr_5_3_0_gap(inputs):
         stride=2,
         name='Downsample_1'
     )
-    x_32 = tf.add(x_16_to_32, x[2])
+    x_32 = layers.Add()([x_16_to_32, x[2]])
     x_32 = layers.BatchNormalization(momentum=clayers.BN_MOMENTUM)(x_32)
     x_32 = layers.ReLU()(x_32)
     x_32_to_64 = clayers.BasicBlock(
@@ -107,7 +107,7 @@ def hr_5_3_0_gap(inputs):
         stride=2,
         name='Downsample_2'
     )
-    x_64 = tf.add(x_32_to_64,x[3])
+    x_64 = layers.Add()([x_32_to_64,x[3]])
     x_64 = layers.BatchNormalization(momentum=clayers.BN_MOMENTUM)(x_64)
     x_64 = layers.ReLU()(x_64)
     x = layers.Conv2D(

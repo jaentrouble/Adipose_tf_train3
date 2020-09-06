@@ -221,7 +221,10 @@ def create_val_data(img, data, img_size):
     for i in img:
         resized = T(image=i)['image'].astype(np.uint8)
         t_img.append(resized.swapaxes(0,1))
-    X = []
+    X = {
+        'image':[],
+        'pos':[]
+    }
     Y = []
     for datum in data:
         t_i = t_img[datum['image']].copy()
@@ -233,10 +236,8 @@ def create_val_data(img, data, img_size):
         t_boxmin = datum['box'][0] / i_size
         t_boxmax = datum['box'][1] / i_size
         t_box = np.append(t_boxmin, t_boxmax)
-        X.append({
-            'image' : t_i,
-            'pos' : t_pos.astype(np.float32)
-        })
+        X['image'].append(t_i)
+        X['pos'].append(t_pos.astype(np.float32))
         Y.append(t_box.astype(np.float32))
     return X, Y
 

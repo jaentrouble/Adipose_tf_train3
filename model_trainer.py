@@ -216,8 +216,8 @@ def get_model(encoder_f, box_f, img_size):
     """
     To get model only and load weights.
     """
-    # policy = mixed_precision.Policy('mixed_float16')
-    # mixed_precision.set_policy(policy)
+    policy = mixed_precision.Policy('mixed_float16')
+    mixed_precision.set_policy(policy)
     inputs = {
         'image' : keras.Input((img_size[0],img_size[1],3)),
         'pos' : keras.Input((2))

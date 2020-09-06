@@ -22,5 +22,5 @@ def dense_128_4_norm(encode_input, pos_input, image_size):
         image_size[1]
     ])
 
-    x = layers.Multiply()(x, image_size)
+    x = layers.Multiply()([x, image_size])
     outputs = layers.Activation('linear',dtype='float32')(x)

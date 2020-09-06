@@ -282,6 +282,7 @@ def run_training(
         steps_per_epoch,
         img,
         data,
+        val_data,
         img_size, 
         mixed_float = True,
         notebook = True,
@@ -337,6 +338,7 @@ def run_training(
         x=train_ds,
         epochs=epochs,
         steps_per_epoch=steps_per_epoch,
+        validation_data=val_data,
         callbacks=[
             tensorboard_callback,
             lr_callback,

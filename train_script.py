@@ -1,5 +1,5 @@
 import numpy as np
-from model_trainer import run_training
+from model_trainer import run_training, create_val_data
 import encoder_models
 import box_models
 import model_lr
@@ -47,6 +47,10 @@ for name in json_names:
 for datum in data :
     datum['image'] = img_name_dict[datum['image']]
 
+data_train = data[:2600]
+data_val = data[2600:2900]
+data_test = dat[2900:]
+
 encoder_f = getattr(encoder_models, args.emodel)
 box_f = getattr(box_models, args.bmodel)
 lr_f = getattr(model_lr, args.lr)
@@ -70,7 +74,8 @@ kwargs = dict(
     mixed_float=mixed_float,
     batch_size=batch_size,
     img=img,
-    data=data,
+    data=data_train,
+    val_data = create_val_data(img, data_val, img_size)
     img_size=img_size,
     notebook= False,
 )

@@ -15,12 +15,12 @@ def dense_128_4_norm(encode_input, pos_input, image_size):
     # This x is normalized value (for stability)
     x = layers.Dense(4)(x)
     
-    output_ratio = tf.convert_to_tensor([
+    output_ratio = tf.reshape(tf.convert_to_tensor([
         image_size[0],
         image_size[1],
         image_size[0],
         image_size[1]
-    ],dtype=tf.float32)
+    ],dtype=tf.float32),[1,4])
 
     x = layers.Multiply()([x, output_ratio])
     outputs = layers.Activation('linear',dtype='float32')(x)

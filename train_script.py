@@ -75,7 +75,7 @@ kwargs = dict(
     batch_size=batch_size,
     img=img,
     data=data_train,
-    val_data = create_val_data(img, data_val, img_size)
+    val_data = create_val_data(img, data_val, img_size),
     img_size=img_size,
     notebook= False,
 )

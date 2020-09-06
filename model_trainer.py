@@ -183,7 +183,8 @@ class AugGenerator():
             keypoints=[cropped_pos],
         )
         t_img = np.array(transformed['image'],np.uint8).swapaxes(0,1)
-        t_pos = np.array(transformed['keypoints'][0], np.int32)
+        t_pos = np.array(transformed['keypoints'][0], np.float32)
+        np.divide(t_pos,t_img.shape[:2], out=t_pos)
         t_box = np.array(transformed['bboxes'][0], np.float32)
         X = {
             'image' : t_img,
@@ -200,7 +201,7 @@ def create_train_dataset(img, data, img_size, batch_size):
         output_types=(
             {
                 'image' : tf.uint8,
-                'pos' : tf.int32,
+                'pos' : tf.float32,
             },
             tf.float32,
         ),
@@ -221,6 +222,9 @@ def create_train_dataset(img, data, img_size, batch_size):
 
 def create_val_data(img, data, img_size):
     """No modification to the image, including cropping and rotating
+
+    Remember, the model takes pygame-style image. 
+    Therefore, image shape is (WIDTH, HEIGHT,3)
     """
     t_img = []
     T = A.Resize(img_size[1],img_size[0])
@@ -235,15 +239,15 @@ def create_val_data(img, data, img_size):
     for datum in data:
         t_i = t_img[datum['image']].copy()
         mask_idx = random.randrange(0,len(datum['mask'][0]))
-
+        # Size of img when data was created
         i_size = np.array(datum['size'])
         pos = np.array([datum['mask'][0][mask_idx], datum['mask'][1][mask_idx]])
-        t_pos = (pos / i_size) * img_size
+        t_pos = pos / i_size
         t_boxmin = datum['box'][0] / i_size
         t_boxmax = datum['box'][1] / i_size
         t_box = np.append(t_boxmin, t_boxmax)
         X['image'].append(t_i)
-        X['pos'].append(t_pos.astype(np.int32))
+        X['pos'].append(t_pos.astype(np.float32))
         Y.append(t_box.astype(np.float32))
     X['image'] = np.array(X['image'])
     X['pos'] = np.array(X['pos'])
@@ -379,7 +383,7 @@ if __name__ == '__main__':
 
     json_names = os.listdir('data/save')
     data = []
-    for name in json_names:
+    for name in json_names[:2]:
         with open('data/save/'+name,'r') as j:
             data.extend(json.load(j))
     for datum in data :
@@ -413,8 +417,10 @@ if __name__ == '__main__':
     for i, s in enumerate(sample):
         ax = fig.add_subplot(5,1,i+1)
         img = s[0]['image'][0].swapaxes(0,1)
-        pos = s[0]['pos'][0]
+
         height, width = img.shape[:2]
+        pos = s[0]['pos'][0] * [width, height]
+
         xmin,ymin,xmax,ymax = s[1][0] * np.array([width, height, width, height])
         rr, cc = draw.disk((pos[1],pos[0]),5, shape=img.shape[:2])
         img[rr,cc] = [0,255,0]

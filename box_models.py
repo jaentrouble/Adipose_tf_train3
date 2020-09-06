@@ -45,3 +45,12 @@ def dense_128_4_normoutpos(encode_input, pos_input, image_size):
 
     outputs = layers.Activation('linear',dtype='float32')(x)
     return outputs
+
+def dense_128_4(encode_input, pos_input):
+    # Takes NORMALIZED position input
+    x = layers.Concatenate()([encode_input, pos_input])
+    x = layers.Dense(128, activation='relu')(x)
+    x = layers.Dense(4)(x)
+
+    outputs = layers.Activation('linear',dtype='float32')(x)
+    return outputs

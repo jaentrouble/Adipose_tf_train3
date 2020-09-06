@@ -51,7 +51,10 @@ box_f = getattr(box_models, args.bmodel)
 lr_f = getattr(model_lr, args.lr)
 name = args.name
 batch_size = 10
+
 img_size = (400,320)
+box_f = partial(box_f, image_size=img_size)
+
 epochs = int(args.epochs)
 steps_per_epoch = len(data)//batch_size
 mixed_float = args.mixed_float

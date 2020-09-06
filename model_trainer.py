@@ -28,7 +28,7 @@ class BoxModel(keras.Model):
     output
     ------
     box
-        [xmin, ymin, xmax, ymax]
+        [xmin, ymin, xmax, ymax], normalized to 0.0 ~ 1.0
     """
     def __init__(self, inputs, encoder_function, box_function):
         """
@@ -118,7 +118,7 @@ class AugGenerator():
             A.RandomRotate90(p=1),
             A.Resize(img_size[1], img_size[0]),
         ],
-        bbox_params=A.BboxParams(format='pascal_voc', label_fields=['bbox_classes']),
+        bbox_params=A.BboxParams(format='albumentations', label_fields=['bbox_classes']),
         keypoint_params=A.KeypointParams(format='xy'),
         )
 
@@ -160,6 +160,13 @@ class AugGenerator():
         cropped_box_min = np.subtract(box_min, np.flip(crop_min))
         cropped_box_max = np.subtract(box_max, np.flip(crop_min))
         cropped_box = np.append(cropped_box_min, cropped_box_max)
+
+        # Normalize
+        width = cropped_image.shape[1]
+        height = cropped_image.shape[0]
+        size = [width, height, width, height]
+        cropped_box = np.divide(cropped_box,size,dtype=np.float32)
+
         cropped_pos = np.subtract(pos, np.flip(crop_min))
         transformed = self.aug(
             image=cropped_image,
@@ -169,7 +176,7 @@ class AugGenerator():
         )
         t_img = np.array(transformed['image'],np.uint8).swapaxes(0,1)
         t_pos = np.array(transformed['keypoints'][0], np.int32)
-        t_box = np.array(transformed['bboxes'][0], np.int32)
+        t_box = np.array(transformed['bboxes'][0], np.float32)
         X = {
             'image' : t_img,
             'pos' : t_pos
@@ -187,7 +194,7 @@ def create_train_dataset(img, data, img_size, batch_size):
                 'image' : tf.uint8,
                 'pos' : tf.int32,
             },
-            tf.int32,
+            tf.float32,
         ),
         output_shapes=(
             {
@@ -369,10 +376,11 @@ if __name__ == '__main__':
         ax = fig.add_subplot(5,1,i+1)
         img = s[0]['image'][0].swapaxes(0,1)
         pos = s[0]['pos'][0]
-        xmin,ymin,xmax,ymax = s[1][0]
+        height, width = img.shape[:2]
+        xmin,ymin,xmax,ymax = s[1][0] * np.array([width, height, width, height])
         rr, cc = draw.disk((pos[1],pos[0]),5, shape=img.shape[:2])
         img[rr,cc] = [0,255,0]
-        rr, cc = draw.rectangle_perimeter((ymin,xmin),(ymax,xmax))
+        rr, cc = draw.rectangle_perimeter((ymin,xmin),(ymax,xmax),shape=img.shape[:2])
         img[rr,cc] = [255,0,0]
         ax.imshow(img)
     plt.show()

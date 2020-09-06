@@ -261,9 +261,9 @@ def run_training(
     mymodel.compile(
         optimizer='adam',
         loss=loss,
-        metrics=[
-            'mse',
-        ]
+        # metrics=[
+        #     'mse',
+        # ]
     )
 
     logdir = 'logs/fit/' + name

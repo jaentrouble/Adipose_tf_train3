@@ -54,7 +54,7 @@ name = args.name
 batch_size = 10
 
 # img_size = (400,320)
-box_f = partial(box_f)
+box_f = box_f
 
 epochs = int(args.epochs)
 steps_per_epoch = len(data)//batch_size

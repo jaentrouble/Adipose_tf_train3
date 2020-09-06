@@ -6,6 +6,7 @@ import model_lr
 import tensorflow as tf
 import argparse
 import os
+from functools import partial
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-em','--encodermodel', dest='emodel')

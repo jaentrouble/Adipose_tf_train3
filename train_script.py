@@ -49,7 +49,7 @@ for datum in data :
 
 data_train = data[:2600]
 data_val = data[2600:2900]
-data_test = dat[2900:]
+data_test = data[2900:]
 
 encoder_f = getattr(encoder_models, args.emodel)
 box_f = getattr(box_models, args.bmodel)

@@ -55,7 +55,7 @@ encoder_f = getattr(encoder_models, args.emodel)
 box_f = getattr(box_models, args.bmodel)
 lr_f = getattr(model_lr, args.lr)
 name = args.name
-batch_size = 6
+batch_size = 8
 
 img_size = (480,320)
 box_f = box_f

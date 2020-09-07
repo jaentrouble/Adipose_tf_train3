@@ -57,7 +57,7 @@ lr_f = getattr(model_lr, args.lr)
 name = args.name
 batch_size = 10
 
-img_size = (400,320)
+img_size = (480,320)
 box_f = box_f
 
 epochs = int(args.epochs)

@@ -61,7 +61,7 @@ img_size = (480,320)
 box_f = box_f
 
 epochs = int(args.epochs)
-steps_per_epoch = len(data)//batch_size
+steps_per_epoch = len(data_train)//batch_size
 mixed_float = args.mixed_float
 
 kwargs = dict(
